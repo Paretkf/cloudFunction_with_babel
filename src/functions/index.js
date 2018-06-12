@@ -9,6 +9,21 @@ const state = {
   USE_CODE: 'USE_CODE',
   VALIDATE_DATA: 'VALIDATE_DATA'
 }
+
+const sampleCode = [
+  'AAAAA',
+  'BBBBB',
+  'CCCCC',
+  'DDDDD',
+  'EEEEE',
+  'FFFFF',
+  'GGGGG',
+  'HHHHH',
+  'IIIII',
+  'JJJJJ',
+  'KKKKK'
+]
+
 const db = admin.firestore()
 
 export let getDiscount = functions.https.onRequest(async (req, res) => {
@@ -78,15 +93,17 @@ function setStatus (type, promoCode) {
 
 async function getCode (tel, net) {
   const result = await db.collection('vip').doc(tel).get()
-  let generatedCode = 'AAAAA'
+  let count = 0
+  let generatedCode = sampleCode[count]
   if (result.exists && net >= 3000) {
     // await db.collection('promoCode').doc('totalDocumentOfPromotionCode').set(newCode)
     const promotion = await db.runTransaction(transaction => {
         return transaction.get(db.collection('promoCode').doc('totalDocumentOfPromotionCode'))
         .then (async t => {
+          count = 0
           let newDocument = t.data().promoCode
           while (newDocument.find(code => code === generatedCode) === generatedCode) {
-            generatedCode = 'BBBBB'
+            generatedCode = sampleCode[++count]
           }
           newDocument.push(generatedCode)
           transaction.update(db.collection('promoCode').doc('totalDocumentOfPromotionCode'), { promoCode: newDocument });
